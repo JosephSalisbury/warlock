@@ -6,8 +6,8 @@ import (
 )
 
 type Sample struct {
-	x float64
-	y float64
+	X float64
+	Y float64
 }
 
 type Regression struct {
@@ -37,17 +37,17 @@ type RegressionBuffer struct {
 
 func (r *RegressionBuffer) Add(s Sample) {
 	if r.n == 0 {
-		r.start = s.x
+		r.start = s.X
 	}
-	r.end = s.x
+	r.end = s.X
 
 	r.n++
 
-	r.sx = r.sx + s.x
-	r.sy = r.sy + s.y
-	r.sxy = r.sxy + s.x*s.y
-	r.sx2 = r.sx2 + s.x*s.x
-	r.sy2 = r.sy2 + s.y*s.y
+	r.sx = r.sx + s.X
+	r.sy = r.sy + s.Y
+	r.sxy = r.sxy + s.X*s.Y
+	r.sx2 = r.sx2 + s.X*s.X
+	r.sy2 = r.sy2 + s.Y*s.Y
 
 	if r.n >= 2 {
 		gradient, err := r.Gradient()
@@ -59,7 +59,7 @@ func (r *RegressionBuffer) Add(s Sample) {
 			panic(err)
 		}
 
-		d := math.Abs(s.y - (gradient*s.x + intercept))
+		d := math.Abs(s.Y - (gradient*s.X + intercept))
 		r.width = math.Max(r.width, d)
 	}
 }

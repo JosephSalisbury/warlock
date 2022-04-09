@@ -36,6 +36,8 @@ func TestRegressionBuffer(t *testing.T) {
 
 				Intercept: 0,
 				Gradient:  1,
+
+				Width: 0,
 			},
 		},
 		"two negative samples": {
@@ -49,6 +51,8 @@ func TestRegressionBuffer(t *testing.T) {
 
 				Intercept: 0,
 				Gradient:  1,
+
+				Width: 0,
 			},
 		},
 		"lower gradient line": {
@@ -63,6 +67,8 @@ func TestRegressionBuffer(t *testing.T) {
 
 				Intercept: 0.5,
 				Gradient:  0.5,
+
+				Width: 0,
 			},
 		},
 		"non-zero width line": {
@@ -80,6 +86,8 @@ func TestRegressionBuffer(t *testing.T) {
 
 				Intercept: 1.363,
 				Gradient:  0.454,
+
+				Width: 1.142,
 			},
 		},
 	}
@@ -115,6 +123,10 @@ func TestRegressionBuffer(t *testing.T) {
 				}
 				if !float64Equals(tc.regression.Gradient, regression.Gradient) {
 					t.Fatalf("expected Gradient: %v, got: %v", tc.regression.Gradient, regression.Gradient)
+				}
+
+				if !float64Equals(tc.regression.Width, regression.Width) {
+					t.Fatalf("expected Width: %v, got: %v", tc.regression.Width, regression.Width)
 				}
 			}
 		})

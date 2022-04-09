@@ -1,6 +1,9 @@
 package regression
 
-import "errors"
+import (
+	"errors"
+	"math"
+)
 
 type Sample struct {
 	x float64
@@ -13,19 +16,23 @@ type Regression struct {
 
 	Intercept float64
 	Gradient  float64
+
+	Width float64
 }
 
 type RegressionBuffer struct {
-	n float64
-
 	start float64
 	end   float64
+
+	n float64
 
 	sx  float64
 	sy  float64
 	sxy float64
 	sx2 float64
 	sy2 float64
+
+	width float64
 }
 
 func (r *RegressionBuffer) Add(s Sample) {
@@ -41,6 +48,40 @@ func (r *RegressionBuffer) Add(s Sample) {
 	r.sxy = r.sxy + s.x*s.y
 	r.sx2 = r.sx2 + s.x*s.x
 	r.sy2 = r.sy2 + s.y*s.y
+
+	if r.n >= 2 {
+		gradient, err := r.Gradient()
+		if err != nil {
+			panic(err)
+		}
+		intercept, err := r.Intercept()
+		if err != nil {
+			panic(err)
+		}
+
+		d := math.Abs(s.y - (gradient*s.x + intercept))
+		r.width = math.Max(r.width, d)
+	}
+}
+
+func (r *RegressionBuffer) Intercept() (float64, error) {
+	if r.n < 2 {
+		return 0, errors.New("intercept requires at least two samples")
+	}
+
+	intercept := (r.sy*r.sx2 - r.sx*r.sxy) / (r.n*r.sx2 - r.sx*r.sx)
+
+	return intercept, nil
+}
+
+func (r *RegressionBuffer) Gradient() (float64, error) {
+	if r.n < 2 {
+		return 0, errors.New("gradient requires at least two samples")
+	}
+
+	gradient := (r.n*r.sxy - r.sx*r.sy) / (r.n*r.sx2 - r.sx*r.sx)
+
+	return gradient, nil
 }
 
 func (r *RegressionBuffer) Regression() (*Regression, error) {
@@ -48,8 +89,14 @@ func (r *RegressionBuffer) Regression() (*Regression, error) {
 		return nil, errors.New("regression requires at least two samples")
 	}
 
-	intercept := (r.sy*r.sx2 - r.sx*r.sxy) / (r.n*r.sx2 - r.sx*r.sx)
-	gradient := (r.n*r.sxy - r.sx*r.sy) / (r.n*r.sx2 - r.sx*r.sx)
+	intercept, err := r.Intercept()
+	if err != nil {
+		return nil, err
+	}
+	gradient, err := r.Gradient()
+	if err != nil {
+		return nil, err
+	}
 
 	regression := Regression{
 		Start: r.start,
@@ -57,6 +104,8 @@ func (r *RegressionBuffer) Regression() (*Regression, error) {
 
 		Intercept: intercept,
 		Gradient:  gradient,
+
+		Width: r.width,
 	}
 
 	return &regression, nil

@@ -1,9 +1,13 @@
 package regression
 
 import (
-	"reflect"
+	"math"
 	"testing"
 )
+
+func float64Equals(a, b float64) bool {
+	return math.Abs(a-b) <= 0.001
+}
 
 func TestRegressionBuffer(t *testing.T) {
 	tests := map[string]struct {
@@ -27,11 +31,11 @@ func TestRegressionBuffer(t *testing.T) {
 				{1, 1},
 			},
 			regression: &Regression{
-				start: 0,
-				end:   1,
+				Start: 0,
+				End:   1,
 
-				intercept: 0,
-				gradient:  1,
+				Intercept: 0,
+				Gradient:  1,
 			},
 		},
 		"two negative samples": {
@@ -40,11 +44,42 @@ func TestRegressionBuffer(t *testing.T) {
 				{0, 0},
 			},
 			regression: &Regression{
-				start: -1,
-				end:   0,
+				Start: -1,
+				End:   0,
 
-				intercept: 0,
-				gradient:  1,
+				Intercept: 0,
+				Gradient:  1,
+			},
+		},
+		"lower gradient line": {
+			input: []Sample{
+				{1, 1},
+				{3, 2},
+				{5, 3},
+			},
+			regression: &Regression{
+				Start: 1,
+				End:   5,
+
+				Intercept: 0.5,
+				Gradient:  0.5,
+			},
+		},
+		"non-zero width line": {
+			input: []Sample{
+				{1, 2},
+				{2, 1},
+				{2, 3},
+				{3, 2},
+				{3, 4},
+				{4, 3},
+			},
+			regression: &Regression{
+				Start: 1,
+				End:   4,
+
+				Intercept: 1.363,
+				Gradient:  0.454,
 			},
 		},
 	}
@@ -67,8 +102,20 @@ func TestRegressionBuffer(t *testing.T) {
 				t.Fatalf("expected error: %v, got: %v", tc.err, err.Error())
 			}
 
-			if !reflect.DeepEqual(tc.regression, regression) {
-				t.Fatalf("expected: %v, got: %v", tc.regression, regression)
+			if tc.regression != nil {
+				if tc.regression.Start != regression.Start {
+					t.Fatalf("expected Start: %v, got: %v", tc.regression.Start, regression.Start)
+				}
+				if tc.regression.End != regression.End {
+					t.Fatalf("expected End: %v, got: %v", tc.regression.End, regression.End)
+				}
+
+				if !float64Equals(tc.regression.Intercept, regression.Intercept) {
+					t.Fatalf("expected Intercept: %v, got: %v", tc.regression.Intercept, regression.Intercept)
+				}
+				if !float64Equals(tc.regression.Gradient, regression.Gradient) {
+					t.Fatalf("expected Gradient: %v, got: %v", tc.regression.Gradient, regression.Gradient)
+				}
 			}
 		})
 	}

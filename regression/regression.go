@@ -8,11 +8,11 @@ type Sample struct {
 }
 
 type Regression struct {
-	start float64
-	end   float64
+	Start float64
+	End   float64
 
-	intercept float64
-	gradient  float64
+	Intercept float64
+	Gradient  float64
 }
 
 type RegressionBuffer struct {
@@ -52,11 +52,11 @@ func (r *RegressionBuffer) Regression() (*Regression, error) {
 	gradient := (r.n*r.sxy - r.sx*r.sy) / (r.n*r.sx2 - r.sx*r.sx)
 
 	regression := Regression{
-		start: r.start,
-		end:   r.end,
+		Start: r.start,
+		End:   r.end,
 
-		intercept: intercept,
-		gradient:  gradient,
+		Intercept: intercept,
+		Gradient:  gradient,
 	}
 
 	return &regression, nil

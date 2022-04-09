@@ -27,6 +27,9 @@ func TestRegressionBuffer(t *testing.T) {
 				{1, 1},
 			},
 			regression: &Regression{
+				start: 0,
+				end:   1,
+
 				intercept: 0,
 				gradient:  1,
 			},
@@ -37,6 +40,9 @@ func TestRegressionBuffer(t *testing.T) {
 				{0, 0},
 			},
 			regression: &Regression{
+				start: -1,
+				end:   0,
+
 				intercept: 0,
 				gradient:  1,
 			},
